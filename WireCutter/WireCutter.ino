@@ -1,3 +1,10 @@
+//*********************************************************
+//  Changes from original soucee:
+//     Reassign IO Pins  
+//     Convert I2C OLED to SPI
+//*********************************************************
+
+
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
@@ -11,20 +18,27 @@
 #define i2c_Address 0x3c
 
 
-const int LINMOT_STEPPERS_STEP_PIN = 19;  // LINMOT: Linear motion
-const int LINMOT_STEPPERS_DIR_PIN = 18;
+const int LINMOT_STEPPERS_STEP_PIN = 21;  // LINMOT: Linear motion
+const int LINMOT_STEPPERS_DIR_PIN = 19;
 
-const int EXTRUDER_STEPPER_STEP_PIN = 16;  // The stepper that moves the wire in the extruder.
-const int EXTRUDER_STEPPER_DIR_PIN = 17;
+const int EXTRUDER_STEPPER_STEP_PIN = 17;  // The stepper that moves the wire in the extruder.
+const int EXTRUDER_STEPPER_DIR_PIN = 16;
 
-const int ENCODER_DT_PIN = 0;
-const int ENCODER_CLK_PIN = 23;
-const int ENCODER_BTN_PIN = 4;
+const int ENCODER_DT_PIN = 26;
+const int ENCODER_CLK_PIN = 25;
+const int ENCODER_BTN_PIN = 27;
 
 // For calibration only. The two buttons are used to move the top blade up and down manually.
 // Once calibrated, you can remove the buttons from the circuit.
 const int BTN1_PIN = 27;
 const int BTN2_PIN = 26;
+
+const int SCREEN_RS_PIN = 0;      // SPI Reset
+const int SCREEN_DC_PIN = 2;      // SPI Register Select (Data/Command)
+const int SCREEN_CS_PIN = 5;      // SPI Chip Select
+const int SCREEN_CLK_PIN = 18;    // SPI Clock
+const int SCREEN_MOSI_PIN = 23;   // SPI Data to device
+//const int SCREEN_MISO_PIN = 19; // SPI Data from device (Not Needed)
 
 const int LINMOT_STEPPERS_STEPS = 1;  // Steppers step(s) movement at a time.
 const int EXTRUDER_STEPPER_STEPS = 1;
@@ -67,8 +81,8 @@ Stepper extruderStepper(200, EXTRUDER_STEPPER_DIR_PIN, EXTRUDER_STEPPER_STEP_PIN
 
 Encoder encoder(ENCODER_DT_PIN, ENCODER_CLK_PIN);
 
-Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
+Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, SCREEN_MOSI_PIN, SCREEN_CLK_PIN, SCREEN_DC_PIN, SCREEN_RS_PIN, SCREEN_CS_PIN);
+//Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 int linMotSteppersCurrStep = 0;  // Current position/step of the stepper motor.
 
@@ -109,9 +123,10 @@ void setup() {
 
     pinMode(ENCODER_BTN_PIN, INPUT_PULLUP);
 
-    pinMode(BTN1_PIN, INPUT_PULLUP);
-    pinMode(BTN2_PIN, INPUT_PULLUP);
+    //pinMode(BTN1_PIN, INPUT_PULLUP);
+    //pinMode(BTN2_PIN, INPUT_PULLUP);
 
+    display.setRotation(2);  
     display.begin(i2c_Address, true);
 }
 
@@ -133,12 +148,12 @@ void loop() {
     encBtnPrevStateMain = encBtnState;
 
 
-    if (!digitalRead(BTN1_PIN)) {
-        moveBlade(1);
-    }
-    if (!digitalRead(BTN2_PIN)) {
-        moveBlade(-1);
-    }
+    // if (!digitalRead(BTN1_PIN)) {
+    //     moveBlade(1);
+    // }
+    // if (!digitalRead(BTN2_PIN)) {
+    //     moveBlade(-1);
+    // }
 }
 
 
